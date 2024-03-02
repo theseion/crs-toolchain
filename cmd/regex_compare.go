@@ -132,8 +132,8 @@ func performCompare(processAll bool, ctx *processors.Context) error {
 				if err != nil && len(chainOffsetString) > 0 {
 					return errors.New("failed to match chain offset. Value must not be larger than 255")
 				}
-				regex := runAssemble(filePath, ctx)
-				err = processRegexForCompare(id, uint8(chainOffset), regex, ctx)
+				rx := runAssemble(filePath, ctx)
+				err = processRegexForCompare(id, uint8(chainOffset), rx, ctx)
 				if err != nil && errors.Is(err, &ComparisonError{}) {
 					failed = true
 					return nil
@@ -148,9 +148,8 @@ func performCompare(processAll bool, ctx *processors.Context) error {
 		if err != nil {
 			logger.Fatal().Err(err).Msg("Failed to compare expressions")
 		}
-		if failed && rootValues.output == gitHub {
-			fmt.Println("::error::All rules need to be up to date.",
-				"Please run `crs-toolchain regex update --all`")
+		if failed {
+			logger.Error().Msg("All rules need to be up to date. Please run `crs-toolchain regex update --all`")
 			return &ComparisonError{}
 		}
 	} else {

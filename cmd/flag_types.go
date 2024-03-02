@@ -41,7 +41,7 @@ func (o *outputType) String() string {
 func (o *outputType) Set(value string) error {
 	switch value {
 	case string(gitHub):
-		logger = loggerConfig.SetGithubOutput()
+		logger = loggerConfig.SetGithubOutput(os.Stdout)
 		fallthrough
 	case string(text):
 		rootValues.output = outputType(value)
