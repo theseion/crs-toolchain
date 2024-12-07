@@ -13,9 +13,9 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"github.com/coreruleset/crs-toolchain/context"
-	"github.com/coreruleset/crs-toolchain/regex"
-	"github.com/coreruleset/crs-toolchain/regex/processors"
+	"github.com/coreruleset/crs-toolchain/v2/context"
+	"github.com/coreruleset/crs-toolchain/v2/regex"
+	"github.com/coreruleset/crs-toolchain/v2/regex/processors"
 )
 
 type parserTestSuite struct {

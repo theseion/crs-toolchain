@@ -10,8 +10,8 @@ import (
 	"github.com/Masterminds/semver/v3"
 	"github.com/spf13/cobra"
 
-	"github.com/coreruleset/crs-toolchain/chore"
-	"github.com/coreruleset/crs-toolchain/context"
+	"github.com/coreruleset/crs-toolchain/v2/chore"
+	"github.com/coreruleset/crs-toolchain/v2/context"
 )
 
 var choreUpdateCopyrightCmd = createChoreUpdateCopyrightCommand()

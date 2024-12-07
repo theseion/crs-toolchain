@@ -9,7 +9,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/coreruleset/crs-toolchain/internal/updater"
+	"github.com/coreruleset/crs-toolchain/v2/internal/updater"
 )
 
 func init() {

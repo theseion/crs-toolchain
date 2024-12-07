@@ -4,9 +4,9 @@
 package main
 
 import (
-	_ "github.com/coreruleset/crs-toolchain/logger"
+	_ "github.com/coreruleset/crs-toolchain/v2/logger"
 
-	"github.com/coreruleset/crs-toolchain/cmd"
+	"github.com/coreruleset/crs-toolchain/v2/cmd"
 )
 
 // nolint: gochecknoglobals

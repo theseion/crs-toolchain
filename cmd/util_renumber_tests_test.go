@@ -11,7 +11,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"github.com/coreruleset/crs-toolchain/util"
+	"github.com/coreruleset/crs-toolchain/v2/util"
 )
 
 type renumberTestsTestSuite struct {
@@ -77,26 +77,26 @@ func TestRunRenumberTestsTestSuite(t *testing.T) {
 }
 
 func (s *renumberTestsTestSuite) TestRenumberTests_WithYaml() {
-	s.writeTestFile("123456.yaml", "test_title: homer")
+	s.writeTestFile("123456.yaml", "test_id: homer")
 	rootCmd.SetArgs([]string{"-d", s.tempDir, "util", "renumber-tests", "123456"})
 	_, err := rootCmd.ExecuteC()
 	s.Require().NoError(err)
 
 	actual := s.readTestFile("123456.yaml")
-	s.Equal("test_title: 123456-1\n", actual)
+	s.Equal("test_id: 1\n", actual)
 }
 
 func (s *renumberTestsTestSuite) TestRenumberTests_WithYml() {
-	s.writeTestFile("123456.yml", "test_title: homer")
+	s.writeTestFile("123456.yml", "test_id: homer")
 	rootCmd.SetArgs([]string{"-d", s.tempDir, "util", "renumber-tests", "123456"})
 	_, err := rootCmd.ExecuteC()
 	s.Require().NoError(err)
 
 	actual := s.readTestFile("123456.yml")
-	s.Equal("test_title: 123456-1\n", actual)
+	s.Equal("test_id: 1\n", actual)
 }
 
-func (s *renumberTestsTestSuite) TestRenumberTests_NormalRuleIdWith() {
+func (s *renumberTestsTestSuite) TestRenumberTests_NormalRuleId() {
 	s.writeTestFile("123456.yaml", "")
 	rootCmd.SetArgs([]string{"-d", s.tempDir, "util", "renumber-tests", "123456"})
 	cmd, _ := rootCmd.ExecuteC()
@@ -130,7 +130,7 @@ func (s *renumberTestsTestSuite) TestRenumberTests_Dash() {
 }
 
 func (s *renumberTestsTestSuite) TestRenumberTests_CheckOnly() {
-	contents := "test_title: homer"
+	contents := "test_id: homer"
 	s.writeTestFile("123456.yaml", contents)
 	rootCmd.SetArgs([]string{"-d", s.tempDir, "util", "renumber-tests", "-c", "123456"})
 	_, err := rootCmd.ExecuteC()
@@ -142,6 +142,58 @@ func (s *renumberTestsTestSuite) TestRenumberTests_CheckOnly() {
 }
 
 func (s *renumberTestsTestSuite) TestRenumberTests_GitHubOutput() {
+	read := s.captureStdout()
+
+	contents := "test_id: homer"
+	s.writeTestFile("123456.yaml", contents)
+	rootCmd.SetArgs([]string{"-d", s.tempDir, "util", "renumber-tests", "-cao", "github"})
+	_, err := rootCmd.ExecuteC()
+
+	s.ErrorIs(err, &util.TestNumberingError{})
+
+	buffer := make([]byte, 1024)
+	_, err = read.Read(buffer)
+	s.Require().NoError(err)
+
+	output := string(buffer)
+	s.Contains(output, "::warning::Test file not properly numbered")
+	s.Contains(output, "::error::")
+	s.Contains(output, "Please run `crs-toolchain util renumber-tests --all`")
+}
+
+func (s *renumberTestsTestSuite) TestRenumberTests_Legacy_WithYaml() {
+	s.writeTestFile("123456.yaml", "test_title: homer")
+	rootCmd.SetArgs([]string{"-d", s.tempDir, "util", "renumber-tests", "123456"})
+	_, err := rootCmd.ExecuteC()
+	s.Require().NoError(err)
+
+	actual := s.readTestFile("123456.yaml")
+	s.Equal("test_title: 123456-1\n", actual)
+}
+
+func (s *renumberTestsTestSuite) TestRenumberTests_Legacy_WithYml() {
+	s.writeTestFile("123456.yml", "test_title: homer")
+	rootCmd.SetArgs([]string{"-d", s.tempDir, "util", "renumber-tests", "123456"})
+	_, err := rootCmd.ExecuteC()
+	s.Require().NoError(err)
+
+	actual := s.readTestFile("123456.yml")
+	s.Equal("test_title: 123456-1\n", actual)
+}
+
+func (s *renumberTestsTestSuite) TestRenumberTests_Legacy_CheckOnly() {
+	contents := "test_title: homer"
+	s.writeTestFile("123456.yaml", contents)
+	rootCmd.SetArgs([]string{"-d", s.tempDir, "util", "renumber-tests", "-c", "123456"})
+	_, err := rootCmd.ExecuteC()
+
+	s.EqualError(err, "Tests are not properly numbered")
+
+	actual := s.readTestFile("123456.yaml")
+	s.Equal(contents, actual)
+}
+
+func (s *renumberTestsTestSuite) TestRenumberTests_Legacy_GitHubOutput() {
 	read := s.captureStdout()
 
 	contents := "test_title: homer"

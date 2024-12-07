@@ -50,7 +50,7 @@ func (s *choreUpdateCopyrightTestSuite) SetupTest() {
 	s.FileExists(path.Join(s.rulesDir, "TEST-900.conf"))
 
 	s.writeFile(path.Join(s.tempDir, "crs-setup.conf.example"), `# ------------------------------------------------------------------------
-# OWASP ModSecurity Core Rule Set ver.4.0.0-rc1
+# OWASP ModSecurity Core Rule Set ver.4.9.0-dev
 # Copyright (c) 2006-2020 Trustwave and contributors. All rights reserved.
 # Copyright (c) 2021-2022 Core Rule Set project. All rights reserved.
 #
@@ -114,6 +114,25 @@ func (s *choreUpdateCopyrightTestSuite) TestUpdateCopyright_ErrIfNoVersion() {
 	s.Equal("update-copyright", cmd.Name())
 
 	s.Error(err, ErrUpdateCopyrightWithoutVersion)
+}
+
+func (s *choreUpdateCopyrightTestSuite) TestUpdateCopyright_DevRelease() {
+	rootCmd.SetArgs([]string{"-d", s.tempDir, "chore", "update-copyright", "-v", "5.4.3-dev"})
+	cmd, _ := rootCmd.ExecuteC()
+
+	s.Equal("update-copyright", cmd.Name())
+
+	// get year from file contents
+	contents, err := os.ReadFile(path.Join(s.rulesDir, "TEST-900.conf"))
+	s.Require().NoError(err)
+	s.Contains(string(contents), "OWASP ModSecurity Core Rule Set ver.5.4.3-dev")
+	s.NotContains(string(contents), "OWASP ModSecurity Core Rule Set ver.5.4.3-dev-dev")
+
+	// check that crs-setup.conf.example was also modified
+	contents, err = os.ReadFile(path.Join(s.tempDir, "crs-setup.conf.example"))
+	s.Require().NoError(err)
+	s.Contains(string(contents), "OWASP ModSecurity Core Rule Set ver.5.4.3-dev")
+	s.NotContains(string(contents), "OWASP ModSecurity Core Rule Set ver.5.4.3-dev-dev")
 }
 
 func (s *choreUpdateCopyrightTestSuite) writeFile(filename string, contents string) {

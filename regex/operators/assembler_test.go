@@ -9,9 +9,9 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"github.com/coreruleset/crs-toolchain/configuration"
-	"github.com/coreruleset/crs-toolchain/context"
-	"github.com/coreruleset/crs-toolchain/regex/processors"
+	"github.com/coreruleset/crs-toolchain/v2/configuration"
+	"github.com/coreruleset/crs-toolchain/v2/context"
+	"github.com/coreruleset/crs-toolchain/v2/regex/processors"
 )
 
 type assemblerTestSuite struct {
@@ -361,7 +361,7 @@ func (s *specialCasesTestSuite) TestBackslashSReplacesPerlEquivalentCharacterCla
 	assembler := NewAssembler(s.ctx)
 	output, err := assembler.Run(contents)
 	s.Require().NoError(err)
-	s.Equal(`[\s\v]`, output)
+	s.Equal(`[\s\x0b]`, output)
 }
 
 func (s *preprocessorsTestSuite) TestSequentialPreprocessors() {
@@ -495,7 +495,7 @@ func (s *definitionsTestSuite) TestDefinition_RetainsEscapes() {
 	output, err := assembler.Run(contents)
 	s.Require().NoError(err)
 
-	s.Equal(`\n[\s\v]\b\v\t`, output)
+	s.Equal(`\n[\s\x0b]\b\v\t`, output)
 
 }
 
@@ -1008,6 +1008,51 @@ func (s *assemblerTestSuite) TestAssemble_ComplexAppendWithAlternation() {
 
 func (s *assemblerTestSuite) TestAssemble_FlagGroupReplacementWithEscapedParentheses() {
 	contents := `^\)ab\(c(capture)`
+	assembler := NewAssembler(s.ctx)
+
+	output, err := assembler.Run(contents)
+
+	s.Require().NoError(err)
+	s.Equal(contents, output)
+}
+
+// regexp/syntax procudes flag groups we don't want. Make sure that
+// Removal of those groups does not remove groups that are semantically
+// relevant, which is the case when the flag group wraps an alternation.
+func (s *assemblerTestSuite) TestAssemble_ReplaceFlagGroupsWithAlternations() {
+	contents := `(?-s:(?s:.)(?i:A|B .))`
+	expected := `.(?:A|B .)`
+	assembler := NewAssembler(s.ctx)
+
+	output, err := assembler.Run(contents)
+
+	s.Require().NoError(err)
+	s.Equal(expected, output)
+}
+
+func (s *assemblerTestSuite) TestAssemble_RemoveOutermostNonMatchingGroup() {
+	contents := `(?:ab|cd)`
+	expected := `ab|cd`
+	assembler := NewAssembler(s.ctx)
+
+	output, err := assembler.Run(contents)
+
+	s.Require().NoError(err)
+	s.Equal(expected, output)
+}
+func (s *assemblerTestSuite) TestAssemble_RemoveOutermostNonMatchingGroup_WithExtraGroup() {
+	contents := `(?:(?:ab|cd))`
+	expected := `ab|cd`
+	assembler := NewAssembler(s.ctx)
+
+	output, err := assembler.Run(contents)
+
+	s.Require().NoError(err)
+	s.Equal(expected, output)
+}
+
+func (s *assemblerTestSuite) TestAssemble_RemoveOutermostNonMatchingGroup_Dont() {
+	contents := `(?:ab|cd)e|fg`
 	assembler := NewAssembler(s.ctx)
 
 	output, err := assembler.Run(contents)

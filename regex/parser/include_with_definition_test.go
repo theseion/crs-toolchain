@@ -13,8 +13,8 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/coreruleset/crs-toolchain/context"
-	"github.com/coreruleset/crs-toolchain/regex/processors"
+	"github.com/coreruleset/crs-toolchain/v2/context"
+	"github.com/coreruleset/crs-toolchain/v2/regex/processors"
 )
 
 type parserIncludeWithDefinitions struct {

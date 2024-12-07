@@ -12,8 +12,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/coreruleset/crs-toolchain/context"
-	"github.com/coreruleset/crs-toolchain/regex"
+	"github.com/coreruleset/crs-toolchain/v2/context"
+	"github.com/coreruleset/crs-toolchain/v2/regex"
 )
 
 var logger = log.With().Str("component", "update-copyright").Logger()

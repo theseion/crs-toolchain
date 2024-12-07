@@ -9,8 +9,8 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"github.com/coreruleset/crs-toolchain/configuration"
-	"github.com/coreruleset/crs-toolchain/context"
+	"github.com/coreruleset/crs-toolchain/v2/configuration"
+	"github.com/coreruleset/crs-toolchain/v2/context"
 )
 
 type cmdLineTestSuite struct {

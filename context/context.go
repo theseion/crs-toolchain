@@ -4,7 +4,7 @@
 package context
 
 import (
-	"github.com/coreruleset/crs-toolchain/configuration"
+	"github.com/coreruleset/crs-toolchain/v2/configuration"
 )
 
 type Context struct {

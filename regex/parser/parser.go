@@ -20,8 +20,8 @@ import (
 	"dario.cat/mergo"
 	"github.com/rs/zerolog/log"
 
-	"github.com/coreruleset/crs-toolchain/regex"
-	"github.com/coreruleset/crs-toolchain/regex/processors"
+	"github.com/coreruleset/crs-toolchain/v2/regex"
+	"github.com/coreruleset/crs-toolchain/v2/regex/processors"
 )
 
 var logger = log.With().Str("component", "parser").Logger()
@@ -288,12 +288,12 @@ func parseFile(rootParser *Parser, filename string, definitions map[string]strin
 
 // Merge prefixes, and suffixes from include files into another parser.
 // All of these need to be treated as local to the source parser.
-// We removed flag merging because of https://github.com/coreruleset/crs-toolchain/issues/72
+// We removed flag merging because of https://github.com/coreruleset/crs-toolchain/v2/issues/72
 func mergePrefixesSuffixes(target *Parser, source *Parser, out *bytes.Buffer) (*bytes.Buffer, error) {
 	logger.Trace().Msg("merging prefixes, suffixes from included file")
 	// If the included file has flags, this is an error
 	if len(source.Flags) > 0 {
-		return new(bytes.Buffer), errors.New("include files must not contain flags. See https://github.com/coreruleset/crs-toolchain/issues/71")
+		return new(bytes.Buffer), errors.New("include files must not contain flags. See https://github.com/coreruleset/crs-toolchain/v2/issues/71")
 	}
 	// IMPORTANT: don't write the assemble block at all if there are no flags, prefixes, or
 	// suffixes. Enclosing the output in an assemble block can change the semantics, for example,

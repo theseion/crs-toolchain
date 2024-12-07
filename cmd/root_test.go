@@ -12,7 +12,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/suite"
 
-	loggerConfig "github.com/coreruleset/crs-toolchain/logger"
+	loggerConfig "github.com/coreruleset/crs-toolchain/v2/logger"
 )
 
 type rootTestSuite struct {

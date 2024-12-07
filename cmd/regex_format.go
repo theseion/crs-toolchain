@@ -16,10 +16,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/coreruleset/crs-toolchain/context"
-	"github.com/coreruleset/crs-toolchain/regex"
-	"github.com/coreruleset/crs-toolchain/regex/parser"
-	"github.com/coreruleset/crs-toolchain/regex/processors"
+	"github.com/coreruleset/crs-toolchain/v2/context"
+	"github.com/coreruleset/crs-toolchain/v2/regex"
+	"github.com/coreruleset/crs-toolchain/v2/regex/parser"
+	"github.com/coreruleset/crs-toolchain/v2/regex/processors"
 )
 
 const (

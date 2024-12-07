@@ -17,18 +17,26 @@ import (
 	"github.com/magefile/mage/sh"
 )
 
-var addLicenseVersion = "v1.1.1" // https://github.com/google/addlicense
+var addLicenseVersion = "v1.1.1" // https://github.com/google/addlicense/releases
 var golangCILintVer = "v1.56.2"  // https://github.com/golangci/golangci-lint/releases
-var gosImportsVer = "v0.3.8"     // https://github.com/rinchsan/gosimports/releases/tag/v0.1.5
-var goGciVer = "v0.10.1"         // https://github.com/daixiang0/gci/releases/tag/v0.8.2
+var gosImportsVer = "v0.3.8"     // https://github.com/rinchsan/gosimports/releases
+var goGciVer = "v0.13.0"         // https://github.com/daixiang0/gci/releases/tag
 
 var errCommitFormatting = errors.New("files not formatted, please commit formatting changes")
 var errNoGitDir = errors.New("no .git directory found")
 
 // Format formats code in this repository.
 func Format() error {
-	if err := sh.RunV("go", "mod", "tidy"); err != nil {
-		return err
+	return FormatAndTidy(true)
+}
+
+// Format formats code in this repository.
+// Run `go mod tidy` if `tidy` is true.
+func FormatAndTidy(tidy bool) error {
+	if tidy {
+		if err := sh.RunV("go", "mod", "tidy"); err != nil {
+			return err
+		}
 	}
 	// addlicense strangely logs skipped files to stderr despite not being erroneous, so use the long sh.Exec form to
 	// discard stderr too.
@@ -72,7 +80,7 @@ func Lint() error {
 	sh.Run("git", "stash", "-k", "-u") // stash unstagged changes so they don't interfere with git diff below
 	defer sh.Run("git", "stash", "pop")
 
-	mg.SerialDeps(Format)
+	mg.SerialDeps(mg.F(FormatAndTidy, false))
 
 	if sh.Run("git", "diff", "--exit-code") != nil {
 		return errCommitFormatting

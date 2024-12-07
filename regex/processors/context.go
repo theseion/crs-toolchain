@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/coreruleset/crs-toolchain/context"
+	"github.com/coreruleset/crs-toolchain/v2/context"
 )
 
 type Context struct {
