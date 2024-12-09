@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 
 	"github.com/rs/zerolog"
+
+	loggerConfig "github.com/coreruleset/crs-toolchain/logger"
 )
 
 // The types in this file satisfy the interface of pflag.Value.
@@ -38,7 +40,10 @@ func (o *outputType) String() string {
 
 func (o *outputType) Set(value string) error {
 	switch value {
-	case string(text), string(gitHub):
+	case string(gitHub):
+		logger = loggerConfig.SetGithubOutput(os.Stdout)
+		fallthrough
+	case string(text):
 		rootValues.output = outputType(value)
 		return nil
 	default:

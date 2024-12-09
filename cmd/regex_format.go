@@ -24,7 +24,6 @@ import (
 
 const (
 	regexAssemblyStandardHeader = "##! Please refer to the documentation at\n##! https://coreruleset.org/docs/development/regex_assembly/.\n"
-	showCharsAround             = 20
 )
 
 // formatCmd represents the generate command
@@ -149,10 +148,7 @@ func processAll(ctxt *processors.Context, checkOnly bool) error {
 		return err
 	}
 	if failed {
-		if rootValues.output == gitHub {
-			fmt.Println("::error::All assembly files need to be properly formatted.",
-				"Please run `crs-toolchain regex format --all`")
-		}
+		logger.Error().Msg("All assembly files need to be properly formatted. Please run `crs-toolchain regex format --all`")
 		return &UnformattedFileError{}
 	}
 	return nil
@@ -160,7 +156,6 @@ func processAll(ctxt *processors.Context, checkOnly bool) error {
 
 func processFile(filePath string, ctxt *processors.Context, checkOnly bool) error {
 	var processFileError error
-	message := ""
 	filename := path.Base(filePath)
 	logger.Info().Msgf("Processing %s", filename)
 	file, err := os.Open(filePath)
@@ -213,8 +208,7 @@ func processFile(filePath string, ctxt *processors.Context, checkOnly bool) erro
 		}
 		equalContent := bytes.Equal(currentContents, newContents)
 		if !equalContent || foundUppercase {
-			message = formatMessage(fmt.Sprintf("File %s not properly formatted", filePath))
-			fmt.Println(message)
+			logger.Error().Msgf("File %s not properly formatted", filePath)
 			processFileError = &UnformattedFileError{filePath: filePath}
 		}
 	} else {
@@ -279,13 +273,6 @@ func processLine(line []byte, indent int) ([]byte, int, error) {
 	trimmedLine = append(adjustment, trimmedLine...)
 
 	return trimmedLine, nextIndent, nil
-}
-
-func formatMessage(message string) string {
-	if rootValues.output == gitHub {
-		message = fmt.Sprintf("::warning ::%s\n", message)
-	}
-	return message
 }
 
 func formatEndOfFile(lines []string) []string {
