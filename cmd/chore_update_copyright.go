@@ -16,8 +16,9 @@ import (
 
 var choreUpdateCopyrightCmd = createChoreUpdateCopyrightCommand()
 var copyrightVariables struct {
-	Version string
-	Year    uint16
+	Version      string
+	Year         uint16
+	IgnoredPaths []string
 }
 var copyrightParsedVariables struct {
 	version *semver.Version
@@ -48,7 +49,7 @@ func createChoreUpdateCopyrightCommand() *cobra.Command {
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			rootContext := context.New(rootValues.workingDirectory.String(), rootValues.configurationFileName.String())
-			copyright.UpdateCopyright(rootContext, copyrightParsedVariables.version, copyrightVariables.Year)
+			copyright.UpdateCopyright(rootContext, copyrightParsedVariables.version, copyrightVariables.Year, copyrightVariables.IgnoredPaths)
 		},
 	}
 }
@@ -57,6 +58,7 @@ func buildChoreUpdateCopyrightCommand() {
 	choreCmd.AddCommand(choreUpdateCopyrightCmd)
 	choreUpdateCopyrightCmd.Flags().Uint16VarP(&copyrightVariables.Year, "year", "y", uint16(time.Now().Year()), "Four digit year")
 	choreUpdateCopyrightCmd.Flags().StringVarP(&copyrightVariables.Version, "version", "v", "", "Add this text as the version to the file.")
+	choreUpdateCopyrightCmd.Flags().StringArrayVarP(&copyrightVariables.IgnoredPaths, "ignore", "i", []string{}, "Comma separated list of paths to ignore")
 }
 
 func rebuildChoreUpdateCopyrightCommand() {

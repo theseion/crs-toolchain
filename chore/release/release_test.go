@@ -89,7 +89,7 @@ func (s *choreReleaseTestSuite) TestCreateCommit() {
 	s.Require().NoError(err)
 	commit, err := repo.CommitObject(*revision)
 	s.Require().NoError(err)
-	s.Equal(fmt.Sprintf("Release %s\n", branchName), commit.Message)
+	s.Equal(fmt.Sprintf("chore: release %s\n", branchName), commit.Message)
 
 	// parent of HEAD is main
 	parent, err := commit.Parent(0)

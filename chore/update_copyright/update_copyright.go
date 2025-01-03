@@ -20,7 +20,7 @@ import (
 var logger = log.With().Str("component", "update-copyright").Logger()
 
 // UpdateCopyright updates the copyright portion of the rules files to the provided year and version.
-func UpdateCopyright(ctxt *context.Context, version *semver.Version, year uint16) {
+func UpdateCopyright(ctxt *context.Context, version *semver.Version, year uint16, ignoredPaths []string) {
 	err := filepath.WalkDir(ctxt.RootDir(), func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			// abort
@@ -30,6 +30,13 @@ func UpdateCopyright(ctxt *context.Context, version *semver.Version, year uint16
 			// continue
 			return nil
 		}
+		for _, ignoredPath := range ignoredPaths {
+			if strings.HasPrefix(path, ignoredPath) {
+				// continue
+				return nil
+			}
+		}
+
 		if strings.HasSuffix(d.Name(), ".conf") || strings.HasSuffix(d.Name(), ".example") {
 			if err := processFile(path, version, year); err != nil {
 				// abort
