@@ -13,11 +13,16 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/cli/go-gh/v2/pkg/api"
-	copyright "github.com/coreruleset/crs-toolchain/v2/chore/update_copyright"
-	"github.com/coreruleset/crs-toolchain/v2/context"
 	"github.com/go-git/go-git/v5"
 	"github.com/rs/zerolog/log"
+
+	copyright "github.com/coreruleset/crs-toolchain/v2/chore/update_copyright"
+	"github.com/coreruleset/crs-toolchain/v2/context"
 )
+
+const examplesPath = "util/crs-rules-check/examples"
+const branchNameTemplate = "release/v%d.%d.%d"
+const prTitleTemplate = "chore: release v%d.%d.%d"
 
 var logger = log.With().Str("component", "release").Logger()
 
@@ -27,9 +32,9 @@ func Release(context *context.Context, repositoryPath string, version *semver.Ve
 		logger.Fatal().Msg("failed to find remote for coreruleset/coreruleset")
 	}
 	fetchSourceRef(remoteName, sourceRef)
-	branchName := fmt.Sprintf("v%d.%d.%d", version.Major(), version.Minor(), version.Patch())
+	branchName := fmt.Sprintf(branchNameTemplate, version.Major(), version.Minor(), version.Patch())
 	createAndCheckOutBranch(context, branchName, sourceRef)
-	copyright.UpdateCopyright(context, version, uint16(time.Now().Year()), []string{"util/crs-rules-check/examples"})
+	copyright.UpdateCopyright(context, version, uint16(time.Now().Year()), []string{examplesPath})
 	createCommit(context, branchName)
 	pushBranch(remoteName, branchName)
 	createPullRequest(version, branchName, sourceRef)
@@ -88,17 +93,17 @@ func createPullRequest(version *semver.Version, branchName string, targetBranchN
 	}
 
 	type prBody struct {
-		Title    string `json:"title"`
-		Head     string `json:"head"`
-		Base     string `json:"base"`
-		Label    string `json:"label"`
-		Reviewer string `json:"reviewer"`
+		Title    string   `json:"title"`
+		Head     string   `json:"head"`
+		Base     string   `json:"base"`
+		Labels   []string `json:"labels"`
+		Reviewer string   `json:"reviewer"`
 	}
 	bodyJson, err := json.Marshal(&prBody{
-		Title:    fmt.Sprintf("Release v%d.%d%d", version.Major(), version.Minor(), version.Patch()),
+		Title:    fmt.Sprintf(prTitleTemplate, version.Major(), version.Minor(), version.Patch()),
 		Head:     "coreruleset:" + branchName,
 		Base:     targetBranchName,
-		Label:    "release:ignore",
+		Labels:   []string{"release", "release:ignore"},
 		Reviewer: "coreruleset/core-developers",
 	})
 	if err != nil {
@@ -107,7 +112,7 @@ func createPullRequest(version *semver.Version, branchName string, targetBranchN
 
 	response, err := client.Request(http.MethodPost, "repos/coreruleset/coreruleset/pulls", bytes.NewReader(bodyJson))
 	if err != nil {
-		log.Fatal().Err(err).Msg("Creating PR failed")
+		log.Fatal().Err(err).Msg("creating PR failed")
 	}
 	defer response.Body.Close()
 }

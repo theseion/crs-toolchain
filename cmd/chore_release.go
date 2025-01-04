@@ -7,9 +7,10 @@ import (
 	"os"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/spf13/cobra"
+
 	release "github.com/coreruleset/crs-toolchain/v2/chore/release"
 	"github.com/coreruleset/crs-toolchain/v2/context"
-	"github.com/spf13/cobra"
 )
 
 var choreReleaseCmd = createChoreReleaseCommand()

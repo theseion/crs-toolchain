@@ -7,10 +7,11 @@ import (
 	"path"
 	"testing"
 
-	"github.com/coreruleset/crs-toolchain/v2/context"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/coreruleset/crs-toolchain/v2/context"
 )
 
 type choreReleaseTestSuite struct {
@@ -20,15 +21,18 @@ type choreReleaseTestSuite struct {
 
 func (s *choreReleaseTestSuite) SetupTest() {
 	s.repoDir = s.T().TempDir()
-	cmd := exec.Command("git", "init", "-b", "main")
-	cmd.Dir = s.repoDir
-	err := cmd.Run()
-	s.Require().NoError(err)
 
-	cmd = exec.Command("git", "commit", "--allow-empty", "-m", "dummy")
-	cmd.Dir = s.repoDir
-	err = cmd.Run()
-	s.Require().NoError(err)
+	out, err := runGit(s.repoDir, "init", "-b", "main")
+	s.Require().NoError(err, string(out))
+
+	out, err = runGit(s.repoDir, "config", "user.email", "dummy@dummy.com")
+	s.Require().NoError(err, string(out))
+
+	out, err = runGit(s.repoDir, "config", "user.name", "dummy")
+	s.Require().NoError(err, string(out))
+
+	out, err = runGit(s.repoDir, "commit", "--allow-empty", "-m", "dummy")
+	s.Require().NoError(err, string(out))
 }
 
 func TestRunChoreReleaseTestSuite(t *testing.T) {
@@ -47,13 +51,14 @@ func (s *choreReleaseTestSuite) TestCreateAndcheckoutBranch() {
 
 	found := false
 	var branchRef *plumbing.Reference
-	branches.ForEach(func(r *plumbing.Reference) error {
+	err = branches.ForEach(func(r *plumbing.Reference) error {
 		if r.Name().Short() == branchName {
 			found = true
 			branchRef = r
 		}
 		return nil
 	})
+	s.Require().NoError(err)
 	s.True(found)
 
 	headRef, err := repo.Head()
@@ -68,10 +73,11 @@ func (s *choreReleaseTestSuite) TestCreateCommit() {
 	createAndCheckOutBranch(ctxt, branchName, "main")
 
 	// Add something to commit, as `createCommit` doesn't allow empty commits
-	os.WriteFile(path.Join(s.repoDir, "file"), []byte("content"), os.ModePerm)
+	err := os.WriteFile(path.Join(s.repoDir, "file"), []byte("content"), os.ModePerm)
+	s.Require().NoError(err)
 	cmd := exec.Command("git", "add", ".")
 	cmd.Dir = s.repoDir
-	err := cmd.Run()
+	err = cmd.Run()
 	s.Require().NoError(err)
 
 	createCommit(ctxt, branchName)
